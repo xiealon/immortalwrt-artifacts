@@ -10,34 +10,62 @@ ImmortalWrt **25.12** x86-64 自编译产物仓库。
 - GitHub 硬限：**单文件超 100 MB 直接拒 push**，仓库推荐 **< 1 GB**
 - 所以产物全部走 **Releases**（单文件上限 **2 GB**），本仓库的 git 里只留索引
 
-## 产物在哪
+## tag 命名规则
 
-**Releases** 里每个 tag = 一次完整编译。
+固件、母包、包仓库**各占一个 tag，互不覆盖**。
 
-tag 命名：`v<源码版本>-x86-64`，例如 `v25.12.2-x86-64`
+| tag | 里面是什么 |
+|---|---|
+| `v25.12.2-fw-x86-64` | 固件 `*squashfs-combined-efi.img.gz` + `sha256sums` |
+| `v25.12.2-ib-x86-64` | ImageBuilder 母包 `*.tar.zst` + `sha256sums` |
+| `v25.12.2-pkg-x86-64` | 包仓库 `packages-x86_64-*.tar.zst` + `sha256sums` |
 
-## 每次 Release 包含什么
+**为什么分开**
 
-| 文件名 | 是什么 | 怎么用 |
-|---|---|---|
-| `*squashfs-combined-efi.img.gz` | 完整固件（UEFI 启动） | 解压后 `dd` 到 U 盘，或直写硬盘 |
-| `immortalwrt-imagebuilder-*.tar.zst` | ImageBuilder 母包，内含编好的包仓库 | 解压后 `make image PACKAGES="..."` 二次组装 |
-| `packages-x86_64-*.tar.zst` | 单独打出的 `.apk` 包仓库 | 解开后当本地 apk 源用 |
-| `sha256sums` | 校验和 | 见下 |
+- 三类体积差一个数量级，单独重传某一种时不用动另外两种
+- 下载时只拉自己需要的那一份
+- **版本在前、类型在后**（`fw` / `ib` / `pkg`），同一版本的三个 tag 在列表里挨在一起，一眼能看出是同一批产出
 
-## 校验
+**同版本重编**（比如改了 config）不新开 tag，直接删旧 asset 重传，并在 release 说明里记 build 时间与源码 commit。
+
+## 各类产物怎么用
+
+### 固件 —— `*-fw-x86-64`
 
 ```sh
-sha256sum -c sha256sums
+gunzip immortalwrt-25.12.2-x86_64-generic-squashfs-combined-efi.img.gz
+dd if=immortalwrt-25.12.2-x86_64-generic-squashfs-combined-efi.img of=/dev/sdX bs=4M conv=fsync
 ```
 
-## 组装固件（母包用法）
+写 U 盘或直写硬盘都行，UEFI 启动。
+
+### 母包 —— `*-ib-x86-64`
+
+ImageBuilder，内含**编好的包仓库**，可二次组装固件而不用重新编译。
 
 ```sh
 tar --zstd -xf immortalwrt-imagebuilder-25.12.2-x86-64.Linux-x86_64.tar.zst
 cd immortalwrt-imagebuilder-25.12.2-x86-64.Linux-x86_64
 make image PROFILE=generic PACKAGES="luci luci-app-xxx kmod-xxx"
 # 产物在 bin/targets/x86/64/
+```
+
+### 包仓库 —— `*-pkg-x86-64`
+
+单独的 `.apk` 包仓库，可以当本地 apk 源挂上，也可以只挑几个装。
+
+```sh
+mkdir -p /www/apk-repo
+tar --zstd -xf packages-x86_64-25.12.2.tar.zst -C /www/apk-repo
+# 然后 /etc/apk/repositories 加一行 http://<LAN IP>/apk-repo
+```
+
+## 校验
+
+每个 tag 都带 `sha256sums`：
+
+```sh
+sha256sum -c sha256sums
 ```
 
 ## 一个必须注意的点
@@ -48,9 +76,11 @@ make image PROFILE=generic PACKAGES="luci luci-app-xxx kmod-xxx"
 
 后果：
 
-- 用本仓库固件 → 只能用**同一 tag** 下的 kmod
+- 用本仓库固件 → 只能用**同一版本**（`v25.12.2-*`）的 kmod
 - 换成官方 ImmortalWrt 固件 → 官方 kmod 全部装不上（哈希对不上）
 - 自己重新编内核 → 之前下的 kmod 全部失效
+
+所以 `-fw` 和 `-pkg` 两个 tag **必须是同一次编译的产出**，不能混搭不同版本。
 
 ## 相关仓库
 
