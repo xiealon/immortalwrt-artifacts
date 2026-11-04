@@ -16,9 +16,9 @@ ImmortalWrt **25.12** x86-64 自编译产物仓库。
 
 | tag | 里面是什么 |
 |---|---|
-| `v25.12.2-fw-x86-64` | 固件 `*squashfs-combined-efi.img.gz` + `sha256sums` |
-| `v25.12.2-ib-x86-64` | ImageBuilder 母包 `*.tar.zst` + `sha256sums` |
-| `v25.12.2-pkg-x86-64` | 包仓库 `packages-x86_64-*.tar.zst` + `sha256sums` |
+| `v25.12.2-fw-x86-64-r2` | 固件 `*squashfs-combined-efi.img.gz` + `sha256sums` |
+| `v25.12.2-ib-x86-64-r2` | ImageBuilder 母包 `*.tar.zst` + `sha256sums` |
+| `v25.12.2-pkg-x86-64-r2` | 包仓库 `packages-x86_64-*.tar.zst` + `sha256sums` |
 
 **为什么分开**
 
