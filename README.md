@@ -91,4 +91,9 @@ sha256sum -c sha256sums
 
 ## License
 
-编译产物遵循 ImmortalWrt / OpenWrt 各自的上游许可（GPL-2.0 等）。
+- **本仓库分发的编译产物**（固件 / 母包 / 包仓库）遵循 ImmortalWrt 与 OpenWrt 上游各自的许可，主体为 **GPL-2.0**。全文见仓库根目录 [`LICENSE`](LICENSE)。
+- **打包、校验与文档整理**由 xiealon 完成，`Copyright (c) 2026-11-05 xiealon`。
+- 本仓库不对上游代码附加任何额外限制；上游许可优先于本文档表述。
+
+> GPL-2.0 与 GPL-3.0 **不兼容**。ImmortalWrt 的 `COPYING` 标的是 `GPL-2.0`（不带 `-or-later`），
+> 因此本仓库产物不能按 GPL-3.0 再分发。
